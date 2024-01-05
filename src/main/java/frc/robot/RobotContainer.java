@@ -48,16 +48,24 @@ public class RobotContainer {
 
   private void autoModeChooser(){
     m_automodeChooser.setDefaultOption("Do Nothing", new SequentialCommandGroup());
-    m_automodeChooser.setDefaultOption("Drive Forward", new SequentialCommandGroup(
+    m_automodeChooser.addOption("Drive Forward", new SequentialCommandGroup(
       DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.5, 0.0)
       .withTimeout(5)
       .andThen(() -> DRIVE_SUBSYSTEM
-      .stop()));
-    )
-    )
-  }
-}
-    )
+      .stop()))
+      )
+
+    );
+    m_automodeChooser.addOption("Drive Forward and do a little jig", new SequentialCommandGroup(
+      DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.5, 0.0)
+      .withTimeout(3)
+      .andThen( () -> DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.0, 90))
+      .withTimeout(3)
+      .andThen( () -> DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.0, -45))
+      .withTimeout(6)
+      .andThen( () -> DRIVE_SUBSYSTEM.run( () -> DRIVE_SUBSYSTEM.stop()
+       ) ) ))
+    )))   ;
 
   }
   /**
@@ -66,6 +74,6 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.5, 0.0).withTimeout(5).andThen(() -> DRIVE_SUBSYSTEM.stop()));
+    return m_automodeChooser.getSelected();
   }
 }
