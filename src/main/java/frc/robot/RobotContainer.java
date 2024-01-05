@@ -6,9 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-//import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.DriveSubsystem;
 
 /**
@@ -20,14 +22,18 @@ import frc.robot.subsystems.DriveSubsystem;
 public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final DriveSubsystem DRIVE_SUBSYSTEM = new DriveSubsystem(DriveSubsystem.initizalizeHardware());
-  //private final CommandXboxController  PRIMARY_CONTROLLER = new CommandXboxController(Constants.HID.PRIMARY_CONTROLLER_PORT);
+  private final CommandXboxController  PRIMARY_CONTROLLER = new CommandXboxController(Constants.HID.PRIMARY_CONTROLLER_PORT);
 
+  private static final SendableChooser<SequentialCommandGroup> m_automodeChooser = new SendableChooser<>();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
 
-   // DRIVE_SUBSYSTEM.setDefaultCommand( new RunCommand(() -> DRIVE_SUBSYSTEM.teleop(PRIMARY_CONTROLLER.getLeftY(), PRIMARY_CONTROLLER.getLeftX()), DRIVE_SUBSYSTEM
-  //  )
-//    );
+    DRIVE_SUBSYSTEM.setDefaultCommand(
+       new RunCommand(() -> DRIVE_SUBSYSTEM.teleop(PRIMARY_CONTROLLER.getLeftY(), 
+       PRIMARY_CONTROLLER.getLeftX()), 
+       DRIVE_SUBSYSTEM
+    )
+    );
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -40,12 +46,26 @@ public class RobotContainer {
    */
   private void configureButtonBindings() {}
 
+  private void autoModeChooser(){
+    m_automodeChooser.setDefaultOption("Do Nothing", new SequentialCommandGroup());
+    m_automodeChooser.setDefaultOption("Drive Forward", new SequentialCommandGroup(
+      DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.5, 0.0)
+      .withTimeout(5)
+      .andThen(() -> DRIVE_SUBSYSTEM
+      .stop()));
+    )
+    )
+  }
+}
+    )
+
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
+    return DRIVE_SUBSYSTEM.run(() -> DRIVE_SUBSYSTEM.set(0.5, 0.0).withTimeout(5).andThen(() -> DRIVE_SUBSYSTEM.stop()));
   }
 }
